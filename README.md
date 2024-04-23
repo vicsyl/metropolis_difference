@@ -1,4 +1,6 @@
-# Differences in objects world coordinates as provided in the [Mapillary Metropolis](https://www.mapillary.com/dataset/metropolis) dataset
+## Differences in objects world coordinates as provided in the [Mapillary Metropolis](https://www.mapillary.com/dataset/metropolis) dataset
+
+<img src="./object--support--pole/1.0234649177693373_1_gEsqliSybkEbUB7JlnCdcmZriHw3GeRzvNkL4xnQ50d8.png" alt="example image" width="800"/>
 
 
 ### File layout
