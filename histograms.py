@@ -31,7 +31,6 @@ def generate(out_fn, data_map, max_dist_value, show=True, cumulative=False):
         plt.ylabel("cumulative probability", fontsize=Conf.ylabel_fs)
     else:
         plt.ylabel("# data points", fontsize=Conf.ylabel_fs)
-
     colors = ["g", "b", "m", "r", "y", "k"]
 
     for ind, (dir, data) in enumerate(data_map.items()):
