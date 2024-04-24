@@ -26,12 +26,12 @@ def generate(out_fn, data_map, show=True):
     plt.ylabel("# data points", fontsize=Conf.ylabel_fs)
 
     for dir, data in data_map.items():
-        max_dist_value = 10
+        max_dist_value = 8
         # bins_c = max(50, int(data.shape[0] / 10))
-        bins_c = 50
-        print(f"bins_c: {bins_c}")
+        bins_c = 100
         bins = np.linspace(0, max_dist_value, bins_c)
         label = dir[8:]
+        data = np.clip(data, a_min=0.0, a_max=max_dist_value - 0.01)
         plt.hist(data, bins, alpha=0.5, label=label)
 
     plt.legend(loc='upper right')
