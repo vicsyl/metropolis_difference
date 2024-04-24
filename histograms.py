@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -16,17 +15,45 @@ class Conf:
     nonsense = None
 
 
-def generate(out_fn, data_map, max_dist_value, show=True, cumulative=False):
-    show = False
+def read_map(file_path):
+    def read_np(s):
+        r = np.fromstring(s, dtype=float, sep=" ")
+        return r
+
+    data = {}
+    curr_key = None
+    with open(file_path, "r") as f:
+
+        buffer = ""
+        for line in f.readlines():
+            if line.startswith("###"):
+                if curr_key:
+                    data[curr_key] = read_np(buffer)
+                curr_key = line[4:-4]
+                buffer = ""
+            else:
+                buffer += line
+
+        data[curr_key] = read_np(buffer)
+
+    return data
+def generate(out_fn,
+             data_map,
+             max_dist_value,
+             show=True,
+             cumulative=False,
+             x_label="Distance [m.]",
+             title=f"Maximal distance of 3D centers of the same object"):
 
     plt.rc("xtick", labelsize=Conf.x_ticksize)
     plt.rc("ytick", labelsize=Conf.y_ticksize)
 
     plt.figure()
 
-    sf = "- cdf" if cumulative else "- histogram"
-    plt.title(f"Maximal distance of 3D centers of the same object {sf}", fontsize=Conf.title_fs)
-    plt.xlabel("Distance [m.]", fontsize=Conf.xlabel_fs)
+    plot_type = "cdf" if cumulative else "histogram"
+    title = f"{title} - {plot_type}"
+    plt.title(title, fontsize=Conf.title_fs)
+    plt.xlabel(x_label, fontsize=Conf.xlabel_fs)
     if cumulative:
         plt.ylabel("cumulative probability", fontsize=Conf.ylabel_fs)
     else:
@@ -92,22 +119,62 @@ def compute_for_dir(dirs):
         m[dir] = data
         print(f"computed dir: {dir}")
 
-    generate(out_fn=f"histograms/density_1/histogram_all.png", max_dist_value=1.0, data_map=m, show=True, cumulative=False)
-    generate(out_fn=f"histograms/density_8/histogram_all.png", max_dist_value=8.0, data_map=m, show=True, cumulative=False)
-    generate(out_fn=f"histograms/cumulative/histogram_all.png", max_dist_value=1.1, data_map=m, show=True, cumulative=True)
+    generate(out_fn=f"histograms/density_1/histogram_all.png", max_dist_value=1.0, data_map=m, show=False, cumulative=False)
+    generate(out_fn=f"histograms/density_8/histogram_all.png", max_dist_value=8.0, data_map=m, show=False, cumulative=False)
+    generate(out_fn=f"histograms/cumulative/histogram_all.png", max_dist_value=1.1, data_map=m, show=False, cumulative=True)
 
     for dir in dirs:
         mm = {dir: m[dir]}
-        generate(out_fn=f"histograms/density_1/histogram_{dir[8:]}.png", max_dist_value=1.0, data_map=mm, show=True, cumulative=False)
-        generate(out_fn=f"histograms/density_8/histogram_{dir[8:]}.png", max_dist_value=8.0, data_map=mm, show=True, cumulative=False)
-        generate(out_fn=f"histograms/cumulative/histogram_{dir[8:]}.png", max_dist_value=1.0002, data_map=mm, show=True, cumulative=True)
+        generate(out_fn=f"histograms/density_1/histogram_{dir[8:]}.png", max_dist_value=1.0, data_map=mm, show=False, cumulative=False)
+        generate(out_fn=f"histograms/density_8/histogram_{dir[8:]}.png", max_dist_value=8.0, data_map=mm, show=False, cumulative=False)
+        generate(out_fn=f"histograms/cumulative/histogram_{dir[8:]}.png", max_dist_value=1.0002, data_map=mm, show=False, cumulative=True)
 
 
-def run():
+def compute_projection_errors(fp="data/projection_errs.txt"):
+
+    m = read_map(fp)
+    k = "object--vehicle--other-vehicle "
+    if m.__contains__(k):
+        m.__delitem__(k)
+
+    generate(out_fn=f"histograms/reprojection_error/density_100/histogram_all.png",
+             max_dist_value=100.0,
+             data_map=m,
+             show=False,
+             cumulative=False,
+             x_label="[px.]",
+             title=f"Projection errors")
+    generate(out_fn=f"histograms/reprojection_error/cumulative/histogram_all.png",
+             max_dist_value=100.0,
+             data_map=m,
+             show=False,
+             cumulative=True,
+             x_label="[px.]",
+             title=f"Projection errors")
+
+    for k, v in m.items():
+        mm = {k: v}
+        generate(out_fn=f"histograms/reprojection_error/density_100/histogram_{k}.png",
+                 max_dist_value=100.0,
+                 data_map=mm,
+                 show=False,
+                 cumulative=False,
+                 x_label="[px.]",
+                 title=f"Projection errors")
+        generate(out_fn=f"histograms/reprojection_error/cumulative/histogram_{k}.png",
+                 max_dist_value=100.0,
+                 data_map=mm,
+                 show=False,
+                 cumulative=True,
+                 x_label = "[px.]",
+                 title = f"Projection errors")
+
+
+def compute_distances():
     dirs = get_dirs()
     compute_for_dir(dirs)
 
 
 if __name__ == "__main__":
-    run()
-
+    #compute_distances()
+    compute_projection_errors()
