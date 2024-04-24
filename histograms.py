@@ -27,7 +27,10 @@ def generate(out_fn, data_map, max_dist_value, show=True, cumulative=False):
     sf = "- cdf" if cumulative else "- histogram"
     plt.title(f"Maximal distance of 3D centers of the same object {sf}", fontsize=Conf.title_fs)
     plt.xlabel("Distance [m.]", fontsize=Conf.xlabel_fs)
-    plt.ylabel("# data points", fontsize=Conf.ylabel_fs)
+    if cumulative:
+        plt.ylabel("cumulative probability", fontsize=Conf.ylabel_fs)
+    else:
+        plt.ylabel("# data points", fontsize=Conf.ylabel_fs)
 
     colors = ["g", "b", "m", "r", "y", "k"]
 
@@ -69,7 +72,7 @@ def generate(out_fn, data_map, max_dist_value, show=True, cumulative=False):
 
 def get_dirs():
     glob = Path("./").glob("object--*")
-    dirs = [i.name for i in glob]
+    dirs = [i.name for i in glob if i.name != "object--vehicle--other-vehicle"]
     print(f"detected dirs: {dirs}")
     return dirs
 
